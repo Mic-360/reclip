@@ -20,8 +20,10 @@ fi
 if [ -n "$missing" ]; then
     echo "Missing required tools:$missing"
     echo ""
-    if [ -n "$PREFIX" ] && [ -n "$TERMUX_VERSION" ]; then
-        echo "Install with:  pkg install$missing"
+    if [ -n "$PREFIX" ]; then
+        termux_missing="$missing"
+        termux_missing="${termux_missing// python3/ python}"
+        echo "Install with:  pkg install$termux_missing"
     elif command -v brew &> /dev/null; then
         echo "Install with:  brew install$missing"
     elif command -v apt &> /dev/null; then
@@ -34,7 +36,7 @@ fi
 
 if ! command -v aria2c &> /dev/null; then
     echo "Notice: aria2c is not installed. Installing it can accelerate downloads."
-    if [ -n "$PREFIX" ] && [ -n "$TERMUX_VERSION" ]; then
+    if [ -n "$PREFIX" ]; then
         echo "You can install it with:  pkg install aria2"
     elif command -v brew &> /dev/null; then
         echo "You can install it with:  brew install aria2"
@@ -54,7 +56,7 @@ else
     source venv/bin/activate
 fi
 
-if [ -n "$PREFIX" ] && [ -n "$TERMUX_VERSION" ]; then
+if [ -n "$PREFIX" ]; then
     if command -v termux-wake-lock &> /dev/null; then
         echo "Acquiring termux-wake-lock to prevent Android from suspending the process..."
         termux-wake-lock

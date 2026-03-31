@@ -28,7 +28,7 @@ cd reclip
 ./reclip.sh
 ```
 This script will automatically create a virtual environment, install the required Python packages (including `waitress` for better concurrency), and start the server.
-It will also acquire a `termux-wake-lock` to keep the process running reliably in the background.
+When running in a compatible Termux environment with `termux-api` available, it will also attempt to acquire a `termux-wake-lock` to help keep the process running reliably in the background.
 
 The app is now running locally at `http://localhost:8899`.
 
