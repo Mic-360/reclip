@@ -415,6 +415,15 @@
       document.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentFormat = btn.dataset.format;
+
+      // Re-render cards instantly when switching formats if they're already fetched
+      if (cardData.length > 0) {
+        for (let i = 0; i < cardData.length; i++) {
+          if (cardData[i].status !== 'loading' && cardData[i].status !== 'info-error') {
+            renderCard(i);
+          }
+        }
+      }
     }
 
     function parseUrls(text) {
@@ -549,12 +558,11 @@
       const isAudio = currentFormat === 'audio';
 
       let thumbHtml;
-      if (isAudio) {
-        thumbHtml = `<div class="no-thumb" style="color:var(--accent)"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>`;
-      } else if (c.thumbnail) {
-        thumbHtml = `<img src="${c.thumbnail}" alt="">`;
+      const fallbackIcon = `<div class="no-thumb" style="color:var(--accent)"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>`;
+      if (c.thumbnail) {
+        thumbHtml = `<img src="${c.thumbnail}" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="no-thumb" style="display:none; color:var(--accent)"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>`;
       } else {
-        thumbHtml = `<div class="no-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="8" cy="8" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>`;
+        thumbHtml = fallbackIcon;
       }
 
       let qualityChips = '';
