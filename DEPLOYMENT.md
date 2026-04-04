@@ -24,7 +24,11 @@ To start ReClip in the background, keeping your terminal free and ensuring it ru
 cd reclip
 ./start-background.sh
 ```
-This will also automatically start a Cloudflare Tunnel and output a public `.trycloudflare.com` URL so you can access ReClip from anywhere on the internet immediately.
+To expose ReClip publicly, enable Cloudflare Tunnel explicitly:
+```bash
+ENABLE_CLOUDFLARED_TUNNEL=1 ./start-background.sh
+```
+**Security note:** A `.trycloudflare.com` tunnel makes your local ReClip instance publicly reachable on the internet, and the generated URL is temporary. If your ReClip deployment does not have its own authentication, consider protecting it with [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/applications/configure-apps/self-hosted-apps/) or only running the tunnel when you actively need remote access.
 
 ---
 

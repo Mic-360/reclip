@@ -8,23 +8,28 @@ echo ""
 
 # Check if running in Termux
 if [ -z "$PREFIX" ]; then
-    echo "This script is optimized for Termux on Android."
-    echo "For other platforms, please see the README: https://github.com/averygan/reclip"
-    echo "Proceeding anyway, but package installation might fail if not using apt/brew."
+    echo "This installer supports automatic dependency installation only on Termux."
+    echo "For other platforms, please follow the manual setup instructions in the README:"
+    echo "https://github.com/averygan/reclip"
     echo ""
+    exit 1
 fi
 
-# Update and install packages if in Termux
-if [ -n "$PREFIX" ] && command -v pkg &> /dev/null; then
-    echo "==> Updating package lists..."
-    pkg update -y && pkg upgrade -y
-
-    echo "==> Requesting storage access..."
-    termux-setup-storage || true
-
-    echo "==> Installing dependencies (Python, FFmpeg, Git, Aria2, Termux-API, Cloudflared)..."
-    pkg install -y python ffmpeg git aria2 termux-api cloudflared wget
+if ! command -v pkg &> /dev/null; then
+    echo "Termux environment detected, but the 'pkg' command is not available."
+    echo "Automatic package installation cannot continue."
+    exit 1
 fi
+
+# Update and install packages in Termux
+echo "==> Updating package lists..."
+pkg update -y && pkg upgrade -y
+
+echo "==> Requesting storage access..."
+termux-setup-storage || true
+
+echo "==> Installing dependencies (Python, FFmpeg, Git, Aria2, Termux-API, Cloudflared)..."
+pkg install -y python ffmpeg git aria2 termux-api cloudflared
 
 # Clone repository
 if [ ! -d "reclip" ]; then

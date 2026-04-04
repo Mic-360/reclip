@@ -27,7 +27,7 @@ Open Termux and run:
 ```bash
 curl -O https://raw.githubusercontent.com/averygan/reclip/main/install.sh && bash install.sh
 ```
-This will automatically install dependencies, clone the repo, setup Python, and create a `start-background.sh` script to run ReClip in the background and expose it via a public Cloudflare URL.
+This will automatically install dependencies, clone the repo, setup Python, and provide the included `start-background.sh` script to run ReClip in the background. To expose it via a public Cloudflare URL, start it with `ENABLE_CLOUDFLARED_TUNNEL=1`.
 
 ### MacOS / Linux
 
