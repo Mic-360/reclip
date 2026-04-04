@@ -17,7 +17,11 @@ def run_download(job_id, url, format_choice, format_id):
     job = jobs[job_id]
     out_template = os.path.join(DOWNLOAD_DIR, f"{job_id}.%(ext)s")
 
-    cmd = ["yt-dlp", "--no-playlist", "-o", out_template]
+    cmd = ["yt-dlp", "--no-playlist", "--quiet", "--no-warnings", "-o", out_template]
+
+    import shutil
+    if shutil.which("aria2c"):
+        cmd += ["--downloader", "aria2c", "--downloader-args", "aria2c:-x 16 -s 16 -k 1M"]
 
     if format_choice == "audio":
         cmd += ["-x", "--audio-format", "mp3"]
@@ -85,7 +89,7 @@ def get_info():
     if not url:
         return jsonify({"error": "No URL provided"}), 400
 
-    cmd = ["yt-dlp", "--no-playlist", "-j", url]
+    cmd = ["yt-dlp", "--no-playlist", "--no-warnings", "-j", url]
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
         if result.returncode != 0:
@@ -168,4 +172,21 @@ def download_file(job_id):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8899))
     host = os.environ.get("HOST", "127.0.0.1")
-    app.run(host=host, port=port)
+
+    try:
+        from waitress import serve
+
+        # Configure Waitress thread count via environment variable with a safe default.
+        threads_env = os.environ.get("WAITRESS_THREADS")
+        try:
+            threads = int(threads_env) if threads_env is not None else 8
+            if threads <= 0:
+                threads = 8
+        except (TypeError, ValueError):
+            threads = 8
+
+        print(f"Running on http://{host}:{port} (Waitress) with {threads} threads")
+        serve(app, host=host, port=port, threads=threads)
+    except ImportError:
+        print(f"Running on http://{host}:{port} (Flask dev server)")
+        app.run(host=host, port=port)
