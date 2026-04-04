@@ -21,6 +21,16 @@ https://github.com/user-attachments/assets/419d3e50-c933-444b-8cab-a9724986ba05
 
 ## Quick Start
 
+### Android / Termux (1-Click Install)
+
+Open Termux and run:
+```bash
+curl -O https://raw.githubusercontent.com/averygan/reclip/main/install.sh && bash install.sh
+```
+This will automatically install dependencies, clone the repo, setup Python, and provide the included `start-background.sh` script to run ReClip in the background. To expose it via a public Cloudflare URL, start it with `ENABLE_CLOUDFLARED_TUNNEL=1`.
+
+### MacOS / Linux
+
 ```bash
 brew install yt-dlp ffmpeg    # or apt install ffmpeg && pip install yt-dlp
 git clone https://github.com/averygan/reclip.git
@@ -30,7 +40,7 @@ cd reclip
 
 Open **http://localhost:8899**.
 
-Or with Docker:
+### Docker
 
 ```bash
 docker build -t reclip . && docker run -p 8899:8899 reclip

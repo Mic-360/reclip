@@ -7,51 +7,36 @@ ReClip can be natively run on an Android device using Termux, taking full advant
 ### 1. Install Termux
 Install Termux and Termux:API from F-Droid (do not use the Google Play Store version as it is outdated).
 
-### 2. Basic Setup
-Open Termux and run the following commands to update packages and grant storage access:
+### 2. One-Click Setup
+Open Termux and run:
 ```bash
-pkg update && pkg upgrade
-termux-setup-storage
+curl -O https://raw.githubusercontent.com/averygan/reclip/main/install.sh && bash install.sh
 ```
+This script will automatically:
+- Update Termux packages.
+- Request storage access.
+- Install dependencies (Python, FFmpeg, git, aria2, termux-api, cloudflared).
+- Clone the ReClip repository and set up the Python environment.
 
-### 3. Install Required Dependencies
-Install Python, FFmpeg, git, and other essential tools. We also highly recommend installing `aria2` to enable multi-threaded downloads, which significantly improves download speeds on mobile devices.
+### 3. Run in Background
+To start ReClip in the background, keeping your terminal free and ensuring it runs continuously:
 ```bash
-pkg install python ffmpeg git aria2 termux-api
-```
-*Note: Installing `termux-api` is important so ReClip can request a wake-lock, preventing Android from putting the app to sleep during long downloads.*
-
-### 4. Clone and Run ReClip
-```bash
-git clone https://github.com/averygan/reclip.git
 cd reclip
-./reclip.sh
+./start-background.sh
 ```
-This script will automatically create a virtual environment, install the required Python packages (including `waitress` for better concurrency), and start the server.
-When running in a compatible Termux environment with `termux-api` available, it will also attempt to acquire a `termux-wake-lock` to help keep the process running reliably in the background.
-
-The app is now running locally at `http://localhost:8899`.
+To expose ReClip publicly, enable Cloudflare Tunnel explicitly:
+```bash
+ENABLE_CLOUDFLARED_TUNNEL=1 ./start-background.sh
+```
+**Security note:** A `.trycloudflare.com` tunnel makes your local ReClip instance publicly reachable on the internet, and the generated URL is temporary. If your ReClip deployment does not have its own authentication, consider protecting it with [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/applications/configure-apps/self-hosted-apps/) or only running the tunnel when you actively need remote access.
 
 ---
 
-## Exposing ReClip via Cloudflare Tunnel
+## Exposing ReClip via Cloudflare Tunnel (Manual Setup)
 
-To access ReClip from anywhere using a live domain (and share it securely), you can use Cloudflare Tunnel (cloudflared). You do not need root access or port forwarding for this.
+The `start-background.sh` script handles creating a temporary tunnel for you. However, if you want a permanent URL using your own domain:
 
-### 1. Install cloudflared in Termux
-You can install `cloudflared` directly via pkg:
-```bash
-pkg install cloudflared
-```
-
-### 2. Start a Quick Tunnel (No Domain Required)
-If you just want a quick, temporary URL to access ReClip:
-```bash
-cloudflared tunnel --url http://localhost:8899
-```
-This will generate a `.trycloudflare.com` URL that you can access from any device.
-
-### 3. Setup a Permanent Tunnel (Custom Domain)
+### Setup a Permanent Tunnel (Custom Domain)
 If you own a domain name and use Cloudflare for DNS:
 1. Log in to your Cloudflare account.
 2. Run `cloudflared tunnel login` in Termux and authenticate.
