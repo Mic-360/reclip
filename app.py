@@ -3,9 +3,16 @@ import re
 import uuid
 import glob
 import json
+import shutil
 import subprocess
 import threading
 from flask import Flask, request, jsonify, send_file, render_template
+
+try:
+    from waitress import serve
+    HAS_WAITRESS = True
+except ImportError:
+    HAS_WAITRESS = False
 
 app = Flask(__name__)
 DOWNLOAD_DIR = os.path.join(os.path.dirname(__file__), "downloads")
@@ -20,7 +27,6 @@ def run_download(job_id, url, format_choice, format_id):
 
     cmd = ["yt-dlp", "--no-playlist", "--quiet", "--no-warnings", "-o", out_template]
 
-    import shutil
     if shutil.which("aria2c"):
         cmd += ["--downloader", "aria2c", "--downloader-args", "aria2c:-x 16 -s 16 -k 1M"]
 
@@ -174,9 +180,7 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8899))
     host = os.environ.get("HOST", "127.0.0.1")
 
-    try:
-        from waitress import serve
-
+    if HAS_WAITRESS:
         # Configure Waitress thread count via environment variable with a safe default.
         threads_env = os.environ.get("WAITRESS_THREADS")
         try:
@@ -188,6 +192,6 @@ if __name__ == "__main__":
 
         print(f"Running on http://{host}:{port} (Waitress) with {threads} threads")
         serve(app, host=host, port=port, threads=threads)
-    except ImportError:
+    else:
         print(f"Running on http://{host}:{port} (Flask dev server)")
         app.run(host=host, port=port)
