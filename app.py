@@ -6,6 +6,7 @@ import json
 import shutil
 import subprocess
 import threading
+import re
 from flask import Flask, request, jsonify, send_file, render_template
 
 try:
@@ -15,6 +16,7 @@ except ImportError:
     HAS_WAITRESS = False
 
 app = Flask(__name__)
+RE_UNSAFE = re.compile(r'[\\/:*?"<>|]')
 DOWNLOAD_DIR = os.path.join(os.path.dirname(__file__), "downloads")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
@@ -112,7 +114,7 @@ def run_download(job_id, url, format_choice, format_id):
         title = job.get("title", "").strip()
         # Sanitize title for filename
         if title:
-            safe_title = re.sub(r'[\\/:*?"<>|]', '', title).strip()[:20].strip()
+            safe_title = RE_UNSAFE.sub("", title).strip()[:20].strip()
             job["filename"] = f"{safe_title}{ext}" if safe_title else os.path.basename(chosen)
         else:
             job["filename"] = os.path.basename(chosen)
