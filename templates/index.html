@@ -3,169 +3,226 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ReClip — Free Media Downloader</title>
+  <title>ReClip — Premium Media Downloader</title>
   <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f4f1eb;
-      --fg: #3a3a38;
-      --accent: #e85d2a;
-      --accent-hover: #d04e1f;
-      --muted: #9c9889;
-      --card: #fff;
-      --card-border: #e2ded6;
-      --success: #2d8a4e;
-      --error: #c43d3d;
-      --radius: 14px;
-      --shimmer: linear-gradient(90deg, #ebe8e2 25%, #f0ede7 50%, #ebe8e2 75%);
+      /* Light Mode Variables */
+      --bg-color: #fbfbfd;
+      --text-main: #1d1d1f;
+      --text-muted: #86868b;
+      --accent: #768F6F; /* Sage Green */
+      --accent-hover: #627b5b;
+      --widget-bg: rgba(255, 255, 255, 0.7);
+      --widget-border: rgba(0, 0, 0, 0.05);
+      --card-bg: rgba(255, 255, 255, 0.8);
+      --card-border: rgba(0, 0, 0, 0.05);
+      --shadow-color: rgba(0, 0, 0, 0.06);
+      --error-color: #ff3b30;
+      --success-color: #34c759;
+      --pill-bg: #f5f5f7;
+      --pill-active-bg: #1d1d1f;
+      --pill-active-fg: #fbfbfd;
+      --feature-bg: #ffffff;
+      --shimmer: linear-gradient(90deg, #f5f5f7 25%, #eaeaea 50%, #f5f5f7 75%);
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #000000;
+        --text-main: #f5f5f7;
+        --text-muted: #a1a1a6;
+        --accent: #8ca985;
+        --accent-hover: #9dbb95;
+        --widget-bg: rgba(28, 28, 30, 0.7);
+        --widget-border: rgba(255, 255, 255, 0.1);
+        --card-bg: rgba(28, 28, 30, 0.8);
+        --card-border: rgba(255, 255, 255, 0.1);
+        --shadow-color: rgba(0, 0, 0, 0.4);
+        --error-color: #ff453a;
+        --success-color: #32d74b;
+        --pill-bg: #1c1c1e;
+        --pill-active-bg: #f5f5f7;
+        --pill-active-fg: #000000;
+        --feature-bg: #111111;
+        --shimmer: linear-gradient(90deg, #1c1c1e 25%, #2c2c2e 50%, #1c1c1e 75%);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
-      font-family: 'DM Mono', monospace;
-      background: var(--bg);
-      color: var(--fg);
-      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.5;
       overflow-x: hidden;
     }
 
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      opacity: 0.03;
-      pointer-events: none;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-      background-size: 128px;
-    }
-
-    .page {
-      max-width: 620px;
+    /* Container */
+    .container {
+      max-width: 1024px;
       margin: 0 auto;
-      padding: 60px 24px 80px;
+      padding: 0 24px;
     }
 
-    .brand { margin-bottom: 48px; }
-    .brand h1 {
-      font-family: 'Instrument Serif', serif;
-      font-size: 4.2rem;
-      font-weight: 400;
-      letter-spacing: -0.03em;
-      line-height: 1;
-      color: var(--fg);
+    /* Navigation */
+    nav {
+      padding: 24px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .brand h1 em { font-style: italic; color: var(--accent); }
-    .brand p {
-      margin-top: 10px;
-      font-size: 0.78rem;
-      color: var(--muted);
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
     }
 
-    textarea {
+    /* Typography */
+    h1, h2, h3 {
+      font-weight: 700;
+      letter-spacing: -0.04em;
+    }
+
+    /* --- Hero Section --- */
+    .hero {
+      text-align: center;
+      padding: 80px 0 60px;
+    }
+    .hero h1 {
+      font-size: clamp(3rem, 8vw, 5rem);
+      line-height: 1.05;
+      margin-bottom: 24px;
+    }
+    .hero p.subtitle {
+      font-size: clamp(1.125rem, 3vw, 1.5rem);
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 48px;
+      letter-spacing: -0.01em;
+      line-height: 1.4;
+    }
+
+    /* Downloader Widget */
+    .widget-container {
+      max-width: 680px;
+      margin: 0 auto;
+      background: var(--widget-bg);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      border: 1px solid var(--widget-border);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 20px 40px var(--shadow-color);
+    }
+
+    textarea#urls {
       width: 100%;
-      padding: 18px 20px;
-      border: 1.5px solid var(--card-border);
-      border-radius: var(--radius);
-      background: var(--card);
-      color: var(--fg);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.88rem;
-      outline: none;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 1.25rem;
       resize: none;
-      min-height: 56px;
-      transition: border-color 0.25s, box-shadow 0.25s;
-      margin-bottom: 6px;
+      outline: none;
+      padding: 12px 8px;
+      margin-bottom: 16px;
     }
-    textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(232, 93, 42, 0.08);
-    }
-    textarea::placeholder { color: var(--muted); }
-
-    .hint {
-      font-size: 0.7rem;
-      color: var(--muted);
-      margin-bottom: 20px;
-      letter-spacing: 0.02em;
+    textarea#urls::placeholder {
+      color: var(--text-muted);
     }
 
     .controls {
       display: flex;
-      gap: 10px;
-      margin-bottom: 6px;
+      justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
     }
+
     .pill-group {
       display: flex;
-      border: 1.5px solid var(--card-border);
-      border-radius: 10px;
-      overflow: hidden;
-      background: var(--card);
+      background: var(--pill-bg);
+      border-radius: 999px;
+      padding: 4px;
     }
     .pill {
-      padding: 9px 18px;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.76rem;
-      border: none;
       background: transparent;
-      color: var(--muted);
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 24px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
+      transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     }
-    .pill.active { background: var(--fg); color: var(--bg); }
-    .pill:not(.active):hover { color: var(--fg); }
+    .pill.active {
+      background: var(--pill-active-bg);
+      color: var(--pill-active-fg);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
 
     .fetch-btn {
-      flex: 1;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 10px;
       background: var(--accent);
       color: #fff;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.82rem;
-      font-weight: 500;
+      border: none;
+      padding: 12px 32px;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
+      transition: all 0.2s ease;
     }
-    .fetch-btn:hover { background: var(--accent-hover); }
-    .fetch-btn:active { transform: scale(0.98); }
-    .fetch-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .fetch-btn:hover {
+      background: var(--accent-hover);
+      transform: scale(1.02);
+    }
+    .fetch-btn:active {
+      transform: scale(0.98);
+    }
+    .fetch-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
 
-    /* Cards */
-    .cards { margin-top: 24px; }
-
-    .card {
+    /* Cards (Result Area) */
+    .cards {
+      margin-top: 24px;
       display: flex;
-      gap: 14px;
-      border: 1.5px solid var(--card-border);
-      border-radius: var(--radius);
-      background: var(--card);
-      padding: 14px;
-      margin-bottom: 10px;
-      animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      flex-direction: column;
+      gap: 16px;
+      text-align: left;
     }
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(12px); }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      gap: 16px;
+      animation: slideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    @keyframes slideDown {
       to { opacity: 1; transform: translateY(0); }
     }
 
     .card-thumb {
-      width: 120px;
-      min-width: 120px;
-      height: 80px;
-      border-radius: 8px;
+      width: 140px;
+      height: 90px;
+      border-radius: 10px;
+      background: var(--widget-border);
       overflow: hidden;
-      background: var(--card-border);
       flex-shrink: 0;
       position: relative;
     }
@@ -173,239 +230,478 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      display: block;
     }
-    /* No-thumbnail icon */
-    .card-thumb .no-thumb {
+    .no-thumb {
       width: 100%;
       height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--muted);
+      color: var(--text-muted);
     }
-    .card-thumb .no-thumb svg {
-      width: 28px;
-      height: 28px;
-      opacity: 0.5;
-    }
+    .no-thumb svg { width: 32px; height: 32px; opacity: 0.5; }
 
-    /* Shimmer skeleton for loading state */
     .card-thumb.loading {
       background: var(--shimmer);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
     }
-    .skeleton-line {
-      height: 12px;
-      border-radius: 4px;
-      background: var(--shimmer);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      margin-bottom: 6px;
-    }
-    .skeleton-line.short { width: 40%; height: 10px; }
-    .skeleton-line.medium { width: 75%; }
-    @keyframes shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
 
     .card-body {
       flex: 1;
-      min-width: 0;
       display: flex;
       flex-direction: column;
       justify-content: center;
+      min-width: 0;
     }
     .card-title {
-      font-family: 'Instrument Serif', serif;
-      font-size: 1rem;
-      line-height: 1.3;
-      color: var(--fg);
-      margin-bottom: 2px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap;
     }
     .card-meta {
-      font-size: 0.68rem;
-      color: var(--muted);
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-      margin-bottom: 8px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
     }
-
     .card-actions {
       display: flex;
-      gap: 6px;
+      gap: 8px;
       align-items: center;
       flex-wrap: wrap;
     }
 
     .card-dl-btn {
-      padding: 6px 14px;
+      background: var(--accent);
+      color: #fff;
       border: none;
-      border-radius: 7px;
-      background: var(--fg);
-      color: var(--bg);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.7rem;
-      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
+      transition: background 0.2s;
     }
-    .card-dl-btn:hover { background: #2d2d2a; }
-    .card-dl-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .card-dl-btn.done { background: var(--success); color: #fff; }
-    .card-dl-btn.error { background: var(--error); color: #fff; }
-
-    .card-status {
-      font-size: 0.68rem;
-      color: var(--muted);
-    }
-    .card-status.downloading { color: var(--accent); }
-    .card-status.done { color: var(--success); }
-    .card-status.error { color: var(--error); }
+    .card-dl-btn:hover { background: var(--accent-hover); }
+    .card-dl-btn.done { background: var(--success-color); }
+    .card-dl-btn.error { background: var(--error-color); }
+    .card-dl-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .q-chip {
-      padding: 4px 10px;
-      border: 1.5px solid var(--card-border);
-      border-radius: 6px;
       background: transparent;
-      color: var(--muted);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.65rem;
+      border: 1px solid var(--text-muted);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
       cursor: pointer;
       transition: all 0.2s;
     }
     .q-chip.active {
-      border-color: var(--fg);
-      color: var(--fg);
-      background: rgba(26,26,24,0.04);
+      border-color: var(--text-main);
+      color: var(--text-main);
+      background: var(--widget-border);
     }
-    .q-chip:hover:not(.active) { border-color: var(--muted); }
 
-    /* Error card */
-    .card.card-error {
-      border-color: rgba(196, 61, 61, 0.2);
-      background: rgba(196, 61, 61, 0.03);
+    .skeleton-line {
+      height: 14px;
+      border-radius: 6px;
+      background: var(--shimmer);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      margin-bottom: 8px;
     }
-    .card-error-icon {
+    .skeleton-line.medium { width: 80%; }
+    .skeleton-line.short { width: 40%; }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .card-status { font-size: 0.85rem; }
+    .card-status.downloading { color: var(--accent); }
+    .card-status.done { color: var(--success-color); }
+    .card-status.error { color: var(--error-color); }
+
+    .card-error {
+      background: rgba(255, 59, 48, 0.05);
+      border-color: rgba(255, 59, 48, 0.2);
+    }
+
+    /* Download All Bar */
+    .dl-all-bar {
+      margin-top: 16px;
+      animation: slideDown 0.5s forwards;
+    }
+    .dl-all-btn {
       width: 100%;
-      height: 100%;
+      padding: 14px;
+      background: var(--text-main);
+      color: var(--bg-color);
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .dl-all-btn:hover {
+      transform: scale(1.01);
+    }
+
+    /* --- Supported Platforms Section --- */
+    .platforms {
+      text-align: center;
+      padding: 60px 0;
+      border-top: 1px solid var(--widget-border);
+      border-bottom: 1px solid var(--widget-border);
+    }
+    .platforms .section-label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 32px;
+      font-weight: 600;
+    }
+    .platform-grid {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+    .platform-icon {
+      color: var(--text-muted);
+      transition: color 0.3s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .platform-icon svg {
+      width: 32px;
+      height: 32px;
+      fill: currentColor;
+    }
+    .platform-icon span {
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .platform-icon:hover {
+      color: var(--text-main);
+    }
+
+    /* --- How It Works --- */
+    .how-it-works {
+      padding: 100px 0;
+      text-align: center;
+    }
+    .how-it-works h2 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      margin-bottom: 60px;
+    }
+    .steps-flow {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .step {
+      flex: 1;
+      min-width: 200px;
+      max-width: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px;
+      background: var(--feature-bg);
+      border-radius: 24px;
+      box-shadow: 0 10px 30px var(--shadow-color);
+    }
+    .step-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--pill-bg);
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(196, 61, 61, 0.08);
-      color: var(--error);
+      margin-bottom: 24px;
+      color: var(--text-main);
     }
-    .card-error-icon svg {
-      width: 24px;
-      height: 24px;
+    .step-icon svg {
+      width: 32px;
+      height: 32px;
+      stroke: currentColor;
+      stroke-width: 1.5;
+      fill: none;
     }
-    .card-error-msg {
-      font-size: 0.72rem;
-      color: var(--error);
-      margin-top: 2px;
-      line-height: 1.4;
+    .step h3 {
+      font-size: 1.25rem;
+      margin-bottom: 8px;
     }
-    .card-error-url {
-      font-size: 0.65rem;
-      color: var(--muted);
-      word-break: break-all;
-      margin-top: 4px;
+    .step p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
     }
 
-    /* Download all bar */
-    .dl-all-bar {
+    /* --- Features Section --- */
+    .features {
+      padding: 60px 0 100px;
+    }
+    .feature-row {
       display: flex;
-      gap: 10px;
-      margin-top: 16px;
+      align-items: center;
+      gap: 60px;
+      margin-bottom: 100px;
     }
-    .dl-all-btn {
+    .feature-row:nth-child(even) {
+      flex-direction: row-reverse;
+    }
+    .feature-text {
       flex: 1;
-      padding: 12px;
-      border: none;
-      border-radius: 10px;
-      background: var(--fg);
-      color: var(--bg);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.82rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
     }
-    .dl-all-btn:hover { background: #2d2d2a; }
-    .dl-all-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .feature-text h2 {
+      font-size: clamp(2rem, 4vw, 2.5rem);
+      margin-bottom: 16px;
+    }
+    .feature-text p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+    }
+    .feature-visual {
+      flex: 1;
+      height: 300px;
+      background: var(--feature-bg);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px var(--shadow-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Abstract Visuals */
+    .visual-globe svg {
+      width: 160px;
+      height: 160px;
+      stroke: var(--accent);
+      stroke-width: 1;
+      fill: none;
+      animation: spinGlobe 20s linear infinite;
+    }
+    @keyframes spinGlobe { 100% { transform: rotate(360deg); } }
+
+    .visual-lock svg {
+      width: 120px;
+      height: 120px;
+      stroke: var(--text-main);
+      stroke-width: 1.5;
+      fill: none;
+    }
+    .visual-lock .shield {
+      fill: var(--accent);
+      opacity: 0.1;
+    }
+
+    /* --- Performance --- */
+    .performance {
+      text-align: center;
+      padding: 100px 0;
+      background: var(--feature-bg);
+    }
+    .performance h2 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, var(--text-main), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .performance p {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* --- Footer --- */
+    .footer {
+      padding: 40px 0;
+      text-align: center;
+      border-top: 1px solid var(--widget-border);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 16px;
+    }
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover {
+      color: var(--text-main);
+    }
+
+    @media (max-width: 768px) {
+      .feature-row, .feature-row:nth-child(even) {
+        flex-direction: column;
+        text-align: center;
+        gap: 32px;
+        margin-bottom: 60px;
+      }
+      .controls { flex-direction: column; align-items: stretch; }
+      .pill-group { justify-content: center; }
+      .fetch-btn { width: 100%; }
+      .card { flex-direction: column; }
+      .card-thumb { width: 100%; height: 180px; }
+      .platform-grid { gap: 24px; }
+    }
 
     .spin {
       display: inline-block;
-      width: 10px; height: 10px;
+      width: 12px; height: 12px;
       border: 2px solid currentColor;
       border-right-color: transparent;
       border-radius: 50%;
       animation: spin 0.6s linear infinite;
       vertical-align: middle;
+      margin-right: 6px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    .footer {
-      margin-top: 48px;
-      text-align: center;
-      font-size: 0.68rem;
-      color: var(--muted);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      line-height: 1.8;
-    }
-
-    /* Mobile */
-    @media (max-width: 500px) {
-      .brand h1 { font-size: 3rem; }
-      .page { padding: 40px 16px 60px; }
-      .card { flex-direction: column; gap: 10px; }
-      .card-thumb {
-        width: 100%;
-        min-width: unset;
-        height: 160px;
-      }
-      .card-title { white-space: normal; }
-      .controls { flex-wrap: wrap; }
-      .fetch-btn { width: 100%; }
-    }
   </style>
 </head>
 <body>
-  <div class="page">
-    <div class="brand">
-      <h1>Re<em>Clip</em></h1>
-      <p>Free media downloader</p>
-    </div>
-
-    <textarea id="urls" placeholder="Paste one or more URLs..." rows="2"></textarea>
-    <p class="hint">Multiple links? Separate with spaces, commas, or newlines.</p>
-
-    <div class="controls">
-      <div class="pill-group">
-        <button class="pill active" data-format="video" onclick="setFormat(this)">MP4</button>
-        <button class="pill" data-format="audio" onclick="setFormat(this)">MP3</button>
-      </div>
-      <button class="fetch-btn" id="goBtn" onclick="go()">Fetch</button>
-    </div>
-
-    <div id="cards" class="cards"></div>
-
-    <div class="footer">
-      YouTube &middot; TikTok &middot; Instagram &middot; Twitter/X &middot; Reddit &middot; Facebook<br>
-      Vimeo &middot; Twitch &middot; Dailymotion &middot; SoundCloud &middot; Loom &middot; Streamable<br>
-      Pinterest &middot; Tumblr &middot; Threads &middot; LinkedIn &middot; 1000+ more
-    </div>
+  <div class="container">
+    <nav>
+      <div class="logo">ReClip</div>
+    </nav>
   </div>
+
+  <section class="hero container">
+    <h1>Download Anything.<br>Instantly.</h1>
+    <p class="subtitle">A self-hosted, open-source video and audio downloader. Paste links from 1000+ sites and download as MP4 or MP3.</p>
+
+    <div class="widget-container">
+      <textarea id="urls" placeholder="Paste YouTube, TikTok, or X link..." rows="1"></textarea>
+
+      <div class="controls">
+        <div class="pill-group">
+          <button class="pill active" data-format="video" onclick="setFormat(this)">MP4</button>
+          <button class="pill" data-format="audio" onclick="setFormat(this)">MP3</button>
+        </div>
+        <button class="fetch-btn" id="goBtn" onclick="go()">Download Now</button>
+      </div>
+
+      <div id="cards" class="cards"></div>
+    </div>
+  </section>
+
+  <section class="platforms container">
+    <p class="section-label">Supported on over 1,000+ platforms</p>
+    <div class="platform-grid">
+      <div class="platform-icon">
+        <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.377.55a3.016 3.016 0 0 0-2.122 2.136C0 8.07 0 12 0 12s0 3.93.501 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.55 9.377.55 9.377.55s7.505 0 9.377-.55a3.016 3.016 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        <span>YouTube</span>
+      </div>
+      <div class="platform-icon">
+        <svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.34 2.88 2.88 0 0 1 2.31-4.53 2.88 2.88 0 0 1 2.06.86v-3.51a6.27 6.27 0 0 0-4.37-1.78A6.36 6.36 0 0 0 5 18.06a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.06z"/></svg>
+        <span>TikTok</span>
+      </div>
+      <div class="platform-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+        <span>Instagram</span>
+      </div>
+      <div class="platform-icon">
+        <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        <span>Twitter/X</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-it-works container">
+    <h2>Beautifully Simple.</h2>
+    <div class="steps-flow">
+      <div class="step">
+         <div class="step-icon">
+           <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"/></svg>
+         </div>
+         <h3>Paste Link</h3>
+         <p>Drop your URL into the field above.</p>
+      </div>
+      <div class="step">
+         <div class="step-icon">
+           <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"/></svg>
+         </div>
+         <h3>Choose Format</h3>
+         <p>Select MP4 video or MP3 audio.</p>
+      </div>
+      <div class="step">
+         <div class="step-icon">
+           <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+         </div>
+         <h3>Download</h3>
+         <p>Get your file instantly, no waiting.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="features container">
+    <div class="feature-row">
+       <div class="feature-text">
+         <h2>1000+ Sites Supported</h2>
+         <p>From social media to streaming platforms, download media effortlessly from practically anywhere on the web.</p>
+       </div>
+       <div class="feature-visual visual-globe">
+         <svg viewBox="0 0 100 100">
+           <circle cx="50" cy="50" r="45"/>
+           <ellipse cx="50" cy="50" rx="20" ry="45"/>
+           <ellipse cx="50" cy="50" rx="45" ry="20" transform="rotate(45 50 50)"/>
+           <ellipse cx="50" cy="50" rx="45" ry="20" transform="rotate(-45 50 50)"/>
+         </svg>
+       </div>
+    </div>
+
+    <div class="feature-row">
+       <div class="feature-text">
+         <h2>Your Data, Your Control</h2>
+         <p>ReClip runs entirely locally. We don't track your downloads, serve ads, or sell your data. Total privacy by design.</p>
+       </div>
+       <div class="feature-visual visual-lock">
+         <svg viewBox="0 0 24 24">
+           <path class="shield" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+           <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+           <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/>
+         </svg>
+       </div>
+    </div>
+  </section>
+
+  <section class="performance">
+    <div class="container">
+      <h2>Fast. Private. Local.</h2>
+      <p>Enjoy blazing fast downloads utilizing your full bandwidth, completely self-hosted for ultimate peace of mind.</p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-links">
+        <a href="#">GitHub</a>
+        <a href="#">Documentation</a>
+        <a href="#">License</a>
+      </div>
+      <p>Open Source Media Downloader &middot; MIT License</p>
+    </div>
+  </footer>
 
   <script>
     let currentFormat = 'video';
@@ -416,7 +712,6 @@
       btn.classList.add('active');
       currentFormat = btn.dataset.format;
 
-      // Re-render cards instantly when switching formats if they're already fetched
       if (cardData.length > 0) {
         for (let i = 0; i < cardData.length; i++) {
           if (cardData[i].status !== 'loading' && cardData[i].status !== 'info-error') {
@@ -444,6 +739,7 @@
     }
 
     function friendlyError(err) {
+      if (!err) return 'Unknown error occurred';
       if (err.includes('Unsupported URL')) return 'This URL is not supported';
       if (err.includes('Video unavailable')) return 'Video is unavailable or private';
       if (err.includes('Private video')) return 'This video is private';
@@ -456,12 +752,18 @@
       return err.length > 80 ? err.slice(0, 80) + '...' : err;
     }
 
-    document.getElementById('urls').addEventListener('keydown', e => {
+    const urlInput = document.getElementById('urls');
+    urlInput.addEventListener('keydown', e => {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); go(); }
+    });
+    // Auto-resize textarea
+    urlInput.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = (this.scrollHeight) + 'px';
     });
 
     async function go() {
-      const urls = parseUrls(document.getElementById('urls').value);
+      const urls = parseUrls(urlInput.value);
       if (!urls.length) return;
 
       const btn = document.getElementById('goBtn');
@@ -509,7 +811,7 @@
       }
 
       btn.disabled = false;
-      btn.textContent = 'Fetch';
+      btn.textContent = 'Download Now';
     }
 
     function renderCard(idx) {
@@ -522,7 +824,6 @@
         document.getElementById('cards').appendChild(el);
       }
 
-      // Loading skeleton
       if (c.status === 'loading') {
         el.className = 'card';
         el.innerHTML = `
@@ -535,34 +836,29 @@
         return;
       }
 
-      // Error state
       if (c.status === 'info-error') {
         el.className = 'card card-error';
         el.innerHTML = `
           <div class="card-thumb">
-            <div class="card-error-icon">
+            <div class="no-thumb" style="color:var(--error-color)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
             </div>
           </div>
           <div class="card-body">
-            <div class="card-title" style="color:var(--error)">Could not fetch video</div>
-            <div class="card-error-msg">${esc(friendlyError(c.error || ''))}</div>
-            <div class="card-error-url">${esc(c.url)}</div>
+            <div class="card-title" style="color:var(--error-color)">Could not fetch video</div>
+            <div class="card-meta">${esc(friendlyError(c.error))}</div>
           </div>
         `;
         return;
       }
 
-      // Ready / downloading / done / error states
       el.className = 'card';
       const isAudio = currentFormat === 'audio';
 
-      let thumbHtml;
-      const fallbackIcon = `<div class="no-thumb" style="color:var(--accent)"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>`;
+      const fallbackIcon = `<div class="no-thumb"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>`;
+      let thumbHtml = fallbackIcon;
       if (c.thumbnail) {
-        thumbHtml = `<img src="${c.thumbnail}" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="no-thumb" style="display:none; color:var(--accent)"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>`;
-      } else {
-        thumbHtml = fallbackIcon;
+        thumbHtml = `<img src="${c.thumbnail}" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="no-thumb" style="display:none"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>`;
       }
 
       let qualityChips = '';
@@ -576,13 +872,13 @@
       if (c.status === 'ready') {
         actionHtml = `<button class="card-dl-btn" onclick="dlCard(${idx})">Download</button>${qualityChips}`;
       } else if (c.status === 'downloading') {
-        actionHtml = `<span class="card-status downloading"><span class="spin"></span> Downloading...</span>`;
+        actionHtml = `<span class="card-status downloading"><span class="spin"></span>Downloading...</span>`;
       } else if (c.status === 'done') {
-        actionHtml = `<button class="card-dl-btn done" onclick="saveCard(${idx})">Save</button>
+        actionHtml = `<button class="card-dl-btn done" onclick="saveCard(${idx})">Save File</button>
           <span class="card-status done">${esc(c.filename || '')}</span>`;
       } else if (c.status === 'error') {
-        actionHtml = `<button class="card-dl-btn" onclick="dlCard(${idx})">Retry</button>
-          <span class="card-status error">${esc(friendlyError(c.error || 'Download failed'))}</span>`;
+        actionHtml = `<button class="card-dl-btn error" onclick="dlCard(${idx})">Retry</button>
+          <span class="card-status error">${esc(friendlyError(c.error || 'Failed'))}</span>`;
       }
 
       el.innerHTML = `
