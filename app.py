@@ -21,10 +21,8 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 jobs = {}
 
 
-def run_download(job_id, url, format_choice, format_id):
-    job = jobs[job_id]
+def _build_download_command(job_id, url, format_choice, format_id):
     out_template = os.path.join(DOWNLOAD_DIR, f"{job_id}.%(ext)s")
-
     cmd = ["yt-dlp", "--no-playlist", "--quiet", "--no-warnings", "-o", out_template]
 
     if shutil.which("aria2c"):
@@ -39,6 +37,46 @@ def run_download(job_id, url, format_choice, format_id):
 
     cmd.append("--")
     cmd.append(url)
+    return cmd
+
+
+def _finalize_download(job_id, format_choice):
+    job = jobs[job_id]
+    files = glob.glob(os.path.join(DOWNLOAD_DIR, f"{job_id}.*"))
+    if not files:
+        job["status"] = "error"
+        job["error"] = "Download completed but no file was found"
+        return
+
+    if format_choice == "audio":
+        target = [f for f in files if f.endswith(".mp3")]
+        chosen = target[0] if target else files[0]
+    else:
+        target = [f for f in files if f.endswith(".mp4")]
+        chosen = target[0] if target else files[0]
+
+    for f in files:
+        if f != chosen:
+            try:
+                os.remove(f)
+            except OSError:
+                pass
+
+    job["status"] = "done"
+    job["file"] = chosen
+    ext = os.path.splitext(chosen)[1]
+    title = job.get("title", "").strip()
+    # Sanitize title for filename
+    if title:
+        safe_title = "".join(c for c in title if c not in r'\/:*?"<>|').strip()[:20].strip()
+        job["filename"] = f"{safe_title}{ext}" if safe_title else os.path.basename(chosen)
+    else:
+        job["filename"] = os.path.basename(chosen)
+
+
+def run_download(job_id, url, format_choice, format_id):
+    job = jobs[job_id]
+    cmd = _build_download_command(job_id, url, format_choice, format_id)
 
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
@@ -47,6 +85,7 @@ def run_download(job_id, url, format_choice, format_id):
             job["error"] = result.stderr.strip().split("\n")[-1]
             return
 
+        _finalize_download(job_id, format_choice)
         files = glob.glob(os.path.join(DOWNLOAD_DIR, f"{job_id}.*"))
         if not files:
             job["status"] = "error"
