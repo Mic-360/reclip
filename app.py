@@ -30,6 +30,7 @@ def run_download(job_id, url, format_choice, format_id):
     else:
         cmd += ["-f", "bestvideo+bestaudio/best", "--merge-output-format", "mp4"]
 
+    cmd.append("--")
     cmd.append(url)
 
     try:
@@ -89,7 +90,7 @@ def get_info():
     if not url:
         return jsonify({"error": "No URL provided"}), 400
 
-    cmd = ["yt-dlp", "--no-playlist", "--no-warnings", "-j", url]
+    cmd = ["yt-dlp", "--no-playlist", "--no-warnings", "-j", "--", url]
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
         if result.returncode != 0:
