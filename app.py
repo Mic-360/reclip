@@ -8,6 +8,9 @@ import subprocess
 import threading
 import re
 from flask import Flask, request, jsonify, send_file, render_template
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 try:
     from waitress import serve
@@ -16,6 +19,8 @@ except ImportError:
     HAS_WAITRESS = False
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
+limiter = Limiter(get_remote_address, app=app)
 RE_UNSAFE = re.compile(r'[\\/:*?"<>|]')
 DOWNLOAD_DIR = os.path.join(os.path.dirname(__file__), "downloads")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
@@ -132,6 +137,7 @@ def index():
 
 
 @app.route("/api/info", methods=["POST"])
+@limiter.limit("10 per minute")
 def get_info():
     data = request.json
     url = data.get("url", "").strip()
@@ -178,8 +184,9 @@ def get_info():
 
 
 @app.route("/api/download", methods=["POST"])
+@limiter.limit("10 per minute")
 def start_download():
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
     url = data.get("url", "").strip()
     format_choice = data.get("format", "video")
     format_id = data.get("format_id")
