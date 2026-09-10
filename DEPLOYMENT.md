@@ -1,64 +1,156 @@
-# ReClip Deployment Guide
+# ReClip Deployment Guide (Ubuntu Server)
 
-## Deploying on Android via Termux
+This guide walks you through deploying ReClip on an Ubuntu Server natively using systemd, Nginx as a reverse proxy, and Let's Encrypt for HTTPS. This setup is intended to host ReClip on the domain `reclip.bhaumicsingh.tech`.
 
-ReClip can be natively run on an Android device using Termux, taking full advantage of the device's capabilities without needing root access.
+## Prerequisites
 
-### 1. Install Termux
-Install Termux and Termux:API from F-Droid (do not use the Google Play Store version as it is outdated).
+- An Ubuntu Server (20.04, 22.04, 24.04, or newer)
+- A user account with sudo privileges (assumed to be `mic` in this guide)
+- The domain `reclip.bhaumicsingh.tech` pointing to your server's IP address (A record)
 
-### 2. One-Click Setup
-Open Termux and run:
+## 1. Install Dependencies
+
+First, update your package lists and install the required system dependencies: Python, FFmpeg, Nginx, and Certbot.
+
 ```bash
-curl -O https://raw.githubusercontent.com/averygan/reclip/main/install.sh && bash install.sh
+sudo apt update
+sudo apt install -y python3 python3-venv python3-pip ffmpeg nginx certbot python3-certbot-nginx git
 ```
-This script will automatically:
-- Update Termux packages.
-- Request storage access.
-- Install dependencies (Python, FFmpeg, git, aria2, termux-api, cloudflared).
-- Clone the ReClip repository and set up the Python environment.
 
-### 3. Run in Background
-To start ReClip in the background, keeping your terminal free and ensuring it runs continuously:
+*(Optional but recommended)* Install `aria2` to speed up downloads using multi-threading:
 ```bash
+sudo apt install -y aria2
+```
+
+## 2. Clone the Repository and Setup the Environment
+
+We will install ReClip in `/home/mic/reclip`.
+
+```bash
+cd /home/mic
+git clone https://github.com/averygan/reclip.git
 cd reclip
-./start-background.sh
 ```
-To expose ReClip publicly, enable Cloudflare Tunnel explicitly:
+
+Create a Python virtual environment and install the required Python packages:
+
 ```bash
-ENABLE_CLOUDFLARED_TUNNEL=1 ./start-background.sh
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 ```
-**Security note:** A `.trycloudflare.com` tunnel makes your local ReClip instance publicly reachable on the internet, and the generated URL is temporary. If your ReClip deployment does not have its own authentication, consider protecting it with [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/applications/configure-apps/self-hosted-apps/) or only running the tunnel when you actively need remote access.
+
+## 3. Create a Systemd Service
+
+To ensure ReClip runs in the background and starts automatically when the server reboots, we will create a systemd service.
+
+Create a new service file:
+
+```bash
+sudo nano /etc/systemd/system/reclip.service
+```
+
+Add the following configuration to the file:
+
+```ini
+[Unit]
+Description=ReClip Service
+After=network.target
+
+[Service]
+User=mic
+Group=mic
+WorkingDirectory=/home/mic/reclip
+Environment="PATH=/home/mic/reclip/venv/bin"
+# Using Waitress as the WSGI server (default in app.py)
+ExecStart=/home/mic/reclip/venv/bin/python app.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Save and exit. Then, reload the systemd daemon, enable the service to start on boot, and start it immediately:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable reclip
+sudo systemctl start reclip
+```
+
+Verify the service is running:
+
+```bash
+sudo systemctl status reclip
+```
+*(You should see it running on `http://127.0.0.1:8899`)*
+
+## 4. Configure Nginx Reverse Proxy
+
+Now, configure Nginx to forward traffic from `reclip.bhaumicsingh.tech` to the local ReClip instance.
+
+Create a new Nginx configuration file:
+
+```bash
+sudo nano /etc/nginx/sites-available/reclip
+```
+
+Add the following configuration:
+
+```nginx
+server {
+    listen 80;
+    server_name reclip.bhaumicsingh.tech;
+
+    location / {
+        proxy_pass http://127.0.0.1:8899;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Depending on the size of files, you might want to increase this,
+        # but ReClip downloads files on the backend directly.
+        client_max_body_size 10M;
+    }
+}
+```
+
+Save and exit. Enable the site by creating a symbolic link to `sites-enabled`:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/reclip /etc/nginx/sites-enabled/
+```
+
+Test the Nginx configuration for syntax errors:
+
+```bash
+sudo nginx -t
+```
+
+If the test is successful, restart Nginx to apply the changes:
+
+```bash
+sudo systemctl restart nginx
+```
+
+## 5. Secure with SSL (Let's Encrypt / Certbot)
+
+Finally, use Certbot to automatically fetch and configure an SSL certificate for your domain.
+
+```bash
+sudo certbot --nginx -d reclip.bhaumicsingh.tech
+```
+
+Follow the prompts. Certbot will automatically modify your Nginx configuration to enable HTTPS and set up automatic certificate renewals.
+
+## 6. Access ReClip
+
+You can now access your ReClip deployment securely at:
+**https://reclip.bhaumicsingh.tech**
 
 ---
 
-## Exposing ReClip via Cloudflare Tunnel (Manual Setup)
+### Alternative Deployments
 
-The `start-background.sh` script handles creating a temporary tunnel for you. However, if you want a permanent URL using your own domain:
-
-### Setup a Permanent Tunnel (Custom Domain)
-If you own a domain name and use Cloudflare for DNS:
-1. Log in to your Cloudflare account.
-2. Run `cloudflared tunnel login` in Termux and authenticate.
-3. Create a tunnel:
-   ```bash
-   cloudflared tunnel create reclip
-   ```
-4. Route your domain (e.g., `reclip.yourdomain.com`) to the tunnel:
-   ```bash
-   cloudflared tunnel route dns reclip reclip.yourdomain.com
-   ```
-5. Run the tunnel:
-   ```bash
-   cloudflared tunnel run --url http://localhost:8899 reclip
-   ```
-
-*Tip: For a permanent setup on Android, you can use an app like [Termux:Boot](https://f-droid.org/packages/com.termux.boot/) to automatically start the `reclip.sh` script and `cloudflared` tunnel whenever your phone restarts.*
-
----
-
-## Performance Notes on Android
-ReClip includes several optimizations for running on mobile hardware:
-1. **Multi-threading:** By installing `aria2`, `yt-dlp` will automatically fragment downloads and stitch them together, maximizing network utilization.
-2. **Resource Management:** Console logging from `yt-dlp` has been suppressed to prevent memory spikes in the terminal environment.
-3. **WSGI Server:** ReClip uses `waitress` to efficiently serve requests without blocking, enabling concurrent fetching and downloading.
+*(If you are looking for the old Android/Termux deployment instructions, they are available in the [repository history](https://github.com/averygan/reclip) or via the `install.sh` and `start-background.sh` scripts included in the repo.)*
