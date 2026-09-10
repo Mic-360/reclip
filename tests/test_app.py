@@ -1,12 +1,14 @@
 import pytest
-from app import app
+from app import app, limiter
 from unittest.mock import patch
 
 @pytest.fixture
 def client():
     app.config['TESTING'] = True
+    limiter.reset()
     with app.test_client() as client:
         yield client
+    limiter.reset()
 
 def test_download_missing_url(client):
     response = client.post('/api/download', json={'format': 'video'})
@@ -30,3 +32,12 @@ def test_download_valid(client):
         assert response.status_code == 200
         assert 'job_id' in response.get_json()
         assert mock_thread.called
+
+def test_download_rate_limited(client):
+    with patch('threading.Thread'):
+        for _ in range(10):
+            response = client.post('/api/download', json={'url': 'https://example.com/video'})
+            assert response.status_code == 200
+
+    response = client.post('/api/download', json={'url': 'https://example.com/video'})
+    assert response.status_code == 429
