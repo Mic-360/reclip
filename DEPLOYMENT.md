@@ -61,7 +61,7 @@ After=network.target
 User=mic
 Group=mic
 WorkingDirectory=/home/mic/reclip
-Environment="PATH=/home/mic/reclip/venv/bin"
+Environment="PATH=/home/mic/reclip/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 # Using Waitress as the WSGI server (default in app.py)
 ExecStart=/home/mic/reclip/venv/bin/python app.py
 Restart=always
